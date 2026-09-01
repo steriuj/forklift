@@ -122,11 +122,11 @@
             let inUse1 = document.getElementById("Use_1") ? document.getElementById("Use_1").value : "";
             let inDrive1 = document.getElementById("Drive_1") ? document.getElementById("Drive_1").value : "";
             let inMaint1 = document.getElementById("Maint_1") ? document.getElementById("Maint_1").value : "";
-            Data[1].UseTime = (inUse1 === "" || isNaN(inUse1)) ? 0 : Number(inUse1); Data[1].TotalUse = Data[1].UseTime;
-            Data[1].DriveTime = (inDrive1 === "" || isNaN(inDrive1)) ? 0 : Number(inDrive1); Data[1].MaintTime = (inMaint1 === "" || isNaN(inMaint1)) ? 0 : Number(inMaint1);
-            let total1El = document.getElementById("Total_1"); if (total1El) total1El.innerText = (inUse1 === "") ? "" : Data[1].TotalUse;
+            Data.UseTime = (inUse1 === "" || isNaN(inUse1)) ? 0 : Number(inUse1); Data.TotalUse = Data.UseTime;
+            Data.DriveTime = (inDrive1 === "" || isNaN(inDrive1)) ? 0 : Number(inDrive1); Data.MaintTime = (inMaint1 === "" || isNaN(inMaint1)) ? 0 : Number(inMaint1);
+            let total1El = document.getElementById("Total_1"); if (total1El) total1El.innerText = (inUse1 === "") ? "" : Data.TotalUse;
             
-            // ★ 사장님 뻑나던 원인 구역 정밀 교정 완료 (InMaint1 대소문자 완벽 매핑)
+            // ★ 연산 뻑나던 오류 완벽 수리 완료 (inMaint1 변수명 매핑 통일)
             if (inUse1 === "" || inDrive1 === "" || inMaint1 === "") {
                 for (let dayIdx = 2; dayIdx <= 46; dayIdx++) {
                     if (dayIdx > ThisMonthDays && dayIdx <= 31) continue;
