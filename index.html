@@ -3,77 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지게차 모바일 일보</title>
+    <title>지게차 모바일 일보 시스템</title>
     <style>
         * { box-sizing: border-box; font-family: 'Malgun Gothic', sans-serif; margin: 0; padding: 0; }
         body { padding: 10px; background-color: #f8f9fa; color: #333; font-size: 14px; }
         h2 { font-size: 16px; font-weight: bold; margin-bottom: 8px; color: #111; }
-        .config-box { background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #ced4da; margin-bottom: 12px; }
+        
+        .config-box { background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #ced4da; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .row-flex { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
         label { font-weight: bold; font-size: 13px; }
         select, input[type="text"], input[type="number"] { padding: 6px; border: 1px solid #ced4da; border-radius: 4px; font-size: 14px; text-align: center; }
-        .record-box { background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #ced4da; }
+        
+        .record-box { background: #fff; padding: 12px; border-radius: 6px; border: 1px solid #ced4da; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .table-scroll { overflow-x: auto; margin-top: 8px; border: 1px solid #adb5bd; border-radius: 4px; }
+        
         table { width: 100%; border-collapse: collapse; min-width: 1250px; text-align: center; }
         th, td { border: 1px solid #adb5bd; height: 35px; vertical-align: middle; padding: 2px; font-size: 13px; font-weight: 500; }
         th { background-color: #495057 !important; color: #ffffff !important; font-weight: bold; }
+        
         tr:nth-child(6n-5) td { background-color: #fff9db; border-bottom: 2px solid #ffec99; }
         tr:nth-child(6n-4) td { background-color: #e7f5ff; font-weight: bold; border-bottom: 2px solid #a5d8ff; }
         tr:nth-child(6n-3) td { background-color: #ffffff; }
         tr:nth-child(6n-2) td { background-color: #f1f3f5; font-weight: bold; }
         tr:nth-child(6n-1) td { background-color: #f1f3f5; font-weight: bold; }
         tr:nth-child(6n) td { background-color: #f1f3f5; font-weight: bold; border-bottom: 3px double #495057; }
+        
         table input[type="number"] { width: 100%; height: 28px; border: 1px solid #ced4da; border-radius: 4px; font-size: 13px; font-weight: bold; background-color: #fff; }
-        table input[type="number"]:focus { border-color: #228be6; background-color: #fffaf0; outline: none; }
+        table input[type="number"]:focus { border-color: #228be6; background-color: #fffaf0; outline: none; box-shadow: 0 0 4px rgba(34,139,230,0.3); }
+        
         .sunday { color: #e03131 !important; background-color: #fff5f5 !important; }
         .disabled-cell { background-color: #e9ecef !important; cursor: not-allowed; }
         input:disabled { background-color: #e9ecef; border-color: #dee2e6; color: #adb5bd; }
     </style>
 </head>
 <body>
+
     <div class="config-box">
         <h2>[ 필수 ] 초기 설정 및 마스터 메모</h2>
         <div class="row-flex">
-            <label>연도:</label><select id="ddlYear" onchange="updateDaysByDate()"></select>
-            <label style="margin-left:10px;">월:</label><select id="ddlMonth" onchange="updateDaysByDate()"></select>
-            <label style="margin-left:10px;">이번달 일수:</label><span id="daysDisplay" style="font-weight:bold; color:blue;">31</span>
+            <label>연도:</label>
+            <select id="ddlYear" onchange="updateDaysByDate()"></select>
+            <label style="margin-left:10px;">월:</label>
+            <select id="ddlMonth" onchange="updateDaysByDate()"></select>
+            <label style="margin-left:10px;">이번달 일수:</label>
+            <span id="daysDisplay" style="font-weight:bold; color:blue;">31</span>
         </div>
         <div class="row-flex" style="margin-top:8px;">
-            <label>누적시간(메모):</label><input type="text" id="editAccum1" style="width:120px;" placeholder="수동 메모 칸">
+            <label>누적시간(메모):</label>
+            <input type="text" id="editAccum1" style="width:120px;" placeholder="수동 메모 칸">
         </div>
     </div>
+
     <div class="record-box">
         <h2>지게차 가동 기록부 (1일차부터 아워미터 입력 시 즉시 연산)</h2>
-        <div class="table-scroll"><table id="forkliftTable"></table></div>
+        <div class="table-scroll">
+            <table id="forkliftTable"></table>
+        </div>
     </div>
     <script>
-        let Data = []; let ThisMonthDays = 31; const today = new Date();
-        let SelectedYear = today.getFullYear(); let SelectedMonth = String(today.getMonth() + 1).padStart(2, '0');
-        for (let i = 0; i <= 46; i++) { Data.push({ UseTime: 0, TotalUse: 0, DriveTime: 0, MaintTime: 0, IsMaint: false }); }
+        // 전역 데이터 배열 및 제어 변수 초기화
+        let Data = [];
+        let ThisMonthDays = 31;
+        const today = new Date();
+        let SelectedYear = today.getFullYear();
+        let SelectedMonth = String(today.getMonth() + 1).padStart(2, '0');
+
+        // 46일차 데이터 저장을 위한 초기 구조 세팅 (소문자 push로 정밀 교정 완료)
+        for (let i = 0; i <= 46; i++) {
+            Data.push({ UseTime: 0, TotalUse: 0, DriveTime: 0, MaintTime: 0, IsMaint: false });
+        }
+
+        // 화면 로드 시 드롭다운 메뉴 세팅 및 표 자동 조립
         window.onload = function() {
-            const ySel = document.getElementById("ddlYear");
+            const yearSelect = document.getElementById("ddlYear");
             for (let y = SelectedYear - 1; y <= SelectedYear + 1; y++) {
                 let opt = document.createElement("option"); opt.value = y; opt.text = y;
-                if (y === SelectedYear) opt.selected = true; ySel.appendChild(opt);
+                if (y === SelectedYear) opt.selected = true; yearSelect.appendChild(opt);
             }
-            const mSel = document.getElementById("ddlMonth");
+            const monthSelect = document.getElementById("ddlMonth");
             for (let m = 1; m <= 12; m++) {
                 let mStr = String(m).padStart(2, '0'); let opt = document.createElement("option"); opt.value = mStr; opt.text = mStr;
-                if (mStr === SelectedMonth) opt.selected = true; mSel.appendChild(opt);
+                if (mStr === SelectedMonth) opt.selected = true; monthSelect.appendChild(opt);
             }
-            createHorizontalBlock(1, 15, "THIS_MONTH"); createHorizontalBlock(16, 31, "THIS_MONTH"); createHorizontalBlock(32, 46, "NEXT_MONTH");
+            
+            // 3단계 가로형 표 구조 동적 조립 구동
+            createHorizontalBlock(1, 15, "THIS_MONTH");
+            createHorizontalBlock(16, 31, "THIS_MONTH");
+            createHorizontalBlock(32, 46, "NEXT_MONTH");
             updateDaysByDate();
         };
+
+        // 연도 및 월 변경 시 해당 월의 정확한 일수(말일) 계산 처리
         function updateDaysByDate() {
-            SelectedYear = document.getElementById("ddlYear").value; SelectedMonth = document.getElementById("ddlMonth").value;
-            let nY = Number(SelectedYear); let nM = Number(SelectedMonth) + 1; if (nM > 12) { nM = 1; nY += 1; }
-            let tDate = new Date(nY, nM - 1, 1); tDate.setDate(tDate.getDate() - 1); ThisMonthDays = tDate.getDate();
-            document.getElementById("daysDisplay").innerText = ThisMonthDays; refreshGrid();
+            SelectedYear = document.getElementById("ddlYear").value;
+            SelectedMonth = document.getElementById("ddlMonth").value;
+            let nextY = Number(SelectedYear); let nextM = Number(SelectedMonth) + 1;
+            if (nextM > 12) { nextM = 1; nextY += 1; }
+            let targetDate = new Date(nextY, nextM - 1, 1); targetDate.setDate(targetDate.getDate() - 1);
+            ThisMonthDays = targetDate.getDate();
+            document.getElementById("daysDisplay").innerText = ThisMonthDays;
+            refreshGrid();
         }
+
+        // 스마트 자물쇠 잠금 및 달력 기반 일요일 빨간색 실시간 동기화
         function refreshGrid() {
+            // 이번 달 일수 너머에 있는 칸들 숨김 및 비활성화 처리
             for (let idx = 17; idx <= 31; idx++) {
-                let chk = document.getElementById("Check_" + idx); let use = document.getElementById("Use_" + idx);
-                let total = document.getElementById("Total_" + idx); let drive = document.getElementById("Drive_" + idx); let maint = document.getElementById("Maint_" + idx);
+                let chk = document.getElementById("Check_" + idx);
+                let use = document.getElementById("Use_" + idx);
+                let total = document.getElementById("Total_" + idx); 
+                let drive = document.getElementById("Drive_" + idx); 
+                let maint = document.getElementById("Maint_" + idx);
                 if (idx > ThisMonthDays) {
                     if (chk) { chk.checked = false; chk.disabled = true; }
                     if (use) { use.value = ""; use.disabled = true; use.classList.add("disabled-cell"); }
@@ -82,18 +122,25 @@
                     if (chk) chk.disabled = false; if (use) { use.disabled = false; use.classList.remove("disabled-cell"); }
                 }
             }
-            let nMNum = Number(SelectedMonth) + 1; let nMYear = SelectedYear; if (nMNum > 12) { nMNum = 1; nMYear = String(Number(SelectedYear) + 1); }
-            let tNM = String(nMNum).padStart(2, '0');
+            
+            // 익월 날짜들의 요일 계산을 위한 타겟 월 설정
+            let nextMonthNum = Number(SelectedMonth) + 1; let nextMonthYear = SelectedYear;
+            if (nextMonthNum > 12) { nextMonthNum = 1; nextMonthYear = String(Number(SelectedYear) + 1); }
+            let targetNextMonth = String(nextMonthNum).padStart(2, '0');
+            
+            // 실제 달력 요일을 연산하여 일요일 칸들 빨간색 적용
             for (let idx = 1; idx <= 46; idx++) {
                 if (idx > ThisMonthDays && idx <= 31) continue;
                 let dayTextEl = document.getElementById("DayText_" + idx); if (!dayTextEl) continue;
                 let wDay;
                 if (idx <= 31) { let d = new Date(SelectedYear, Number(SelectedMonth) - 1, idx); wDay = d.getDay(); }
-                else { let dispDay = idx - 31; let d = new Date(nMYear, Number(tNM) - 1, dispDay); wDay = d.getDay(); }
+                else { let dispDay = idx - 31; let d = new Date(nextMonthYear, Number(targetNextMonth) - 1, dispDay); wDay = d.getDay(); }
                 if (wDay === 0) { dayTextEl.classList.add("sunday"); } else { dayTextEl.classList.remove("sunday"); }
             }
             calculateData();
         }
+
+        // 가로형 표 화면 자동 드로잉 조립 생성 함수
         function createHorizontalBlock(startDay, endDay, monthType) {
             const table = document.getElementById("forkliftTable");
             let rowChk = document.createElement("tr"); let rowDay = document.createElement("tr"); rowDay.classList.add("date-row");
@@ -102,12 +149,15 @@
             rowChk.innerHTML = `<th style="min-width:90px;">정비체크</th>`; rowDay.innerHTML = `<th>날짜</th>`;
             rowUse.innerHTML = `<th>사용시간1일</th>`; rowTotal.innerHTML = `<th>합계</th>`;
             rowDrive.innerHTML = `<th>운행시간</th>`; rowMaint.innerHTML = `<th>정비시간</th>`;
+            
             for (let idx = startDay; idx <= endDay; idx++) {
                 let dispDay = (monthType === "THIS_MONTH") ? idx : (idx - 31);
                 if (idx === 1) { rowChk.innerHTML += `<td>-</td>`; }
                 else { rowChk.innerHTML += `<td><input type="checkbox" id="Check_${idx}" onchange="calculateData()"></td>`; }
                 rowDay.innerHTML += `<td id="DayText_${idx}">${dispDay}</td>`;
                 rowUse.innerHTML += `<td><input type="number" id="Use_${idx}" step="any" oninput="calculateData()"></td>`;
+                
+                // 1일 차 합계는 텍스트 처리, 운행 및 정비시간만 직접 입력 Edit 창 제공
                 if (idx === 1) {
                     rowTotal.innerHTML += `<td id="Total_1"></td>`;
                     rowDrive.innerHTML += `<td><input type="number" id="Drive_1" step="any" oninput="calculateData()"></td>`;
@@ -118,15 +168,19 @@
             }
             table.appendChild(rowChk); table.appendChild(rowDay); table.appendChild(rowUse); table.appendChild(rowTotal); table.appendChild(rowDrive); table.appendChild(rowMaint);
         }
+
+        // 실시간 연속 누적 계산 및 정비체크 리셋 엔진 구현부
         function calculateData() {
             let inUse1 = document.getElementById("Use_1") ? document.getElementById("Use_1").value : "";
             let inDrive1 = document.getElementById("Drive_1") ? document.getElementById("Drive_1").value : "";
             let inMaint1 = document.getElementById("Maint_1") ? document.getElementById("Maint_1").value : "";
-            Data.UseTime = (inUse1 === "" || isNaN(inUse1)) ? 0 : Number(inUse1); Data.TotalUse = Data.UseTime;
-            Data.DriveTime = (inDrive1 === "" || isNaN(inDrive1)) ? 0 : Number(inDrive1); Data.MaintTime = (inMaint1 === "" || isNaN(inMaint1)) ? 0 : Number(inMaint1);
-            let total1El = document.getElementById("Total_1"); if (total1El) total1El.innerText = (inUse1 === "") ? "" : Data.TotalUse;
             
-            // ★ 연산 뻑나던 오류 완벽 수리 완료 (inMaint1 변수명 매핑 통일)
+            // 1일 차 데이터 정립 및 화면 연동
+            Data[1].UseTime = (inUse1 === "" || isNaN(inUse1)) ? 0 : Number(inUse1); Data[1].TotalUse = Data[1].UseTime;
+            Data[1].DriveTime = (inDrive1 === "" || isNaN(inDrive1)) ? 0 : Number(inDrive1); Data[1].MaintTime = (inMaint1 === "" || isNaN(inMaint1)) ? 0 : Number(inMaint1);
+            let total1El = document.getElementById("Total_1"); if (total1El) total1El.innerText = (inUse1 === "") ? "" : Data[1].TotalUse;
+            
+            // 필수 마스터 기준값 공백 발생 시 연산 보류 및 하단 초기화 (소문자 오타 정밀 교정 완료)
             if (inUse1 === "" || inDrive1 === "" || inMaint1 === "") {
                 for (let dayIdx = 2; dayIdx <= 46; dayIdx++) {
                     if (dayIdx > ThisMonthDays && dayIdx <= 31) continue;
@@ -136,18 +190,23 @@
                 }
                 return;
             }
+            
+            // 2일 차부터 각 날짜별 사용시간 및 체크박스 상태 데이터 동적 수집
             for (let i = 2; i <= 46; i++) {
                 if (i > ThisMonthDays && i <= 31) continue;
                 let cellEl = document.getElementById("Use_" + i); let cellTxt = cellEl ? cellEl.value : "";
                 Data[i].UseTime = (cellTxt === "" || isNaN(cellTxt)) ? 0 : Number(cellTxt);
                 let chkEl = document.getElementById("Check_" + i); Data[i].IsMaint = chkEl ? chkEl.checked : false;
             }
+            
+            // 루프 연산을 통한 전체 날짜 결과 도출 및 화면 실시간 매핑
             for (let i = 2; i <= 46; i++) {
                 if (i > ThisMonthDays && i <= 31) continue;
                 let prev = (i === 32) ? Data[ThisMonthDays] : Data[i - 1]; let curr = Data[i];
                 curr.TotalUse = (i === 32) ? curr.UseTime : (prev.TotalUse + curr.UseTime);
                 curr.DriveTime = prev.DriveTime + curr.UseTime;
                 curr.MaintTime = curr.IsMaint ? curr.UseTime : (prev.MaintTime + curr.UseTime);
+                
                 let cellTotal = document.getElementById("Total_" + i); if (cellTotal) cellTotal.innerText = curr.TotalUse;
                 let cellDrive = document.getElementById("Drive_" + i); if (cellDrive) cellDrive.innerText = curr.DriveTime;
                 let cellMaint = document.getElementById("Maint_" + i); if (cellMaint) cellMaint.innerText = curr.MaintTime;
